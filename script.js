@@ -1,7 +1,8 @@
  // Backend API base URL 
 // port available 8000 to 8006
 // const SERVER_URL = "http://127.0.0.1:8001"; 
-const SERVER_URL = "http://44.242.220.46:8001/";
+// const SERVER_URL = "http://44.242.220.46:8001/";
+ const SERVER_URL='https://ollama-proxy.kneotech.cloud';
 const modelSelect = document.getElementById("model-select");
 const chatBox = document.querySelector(".chat-box");
 const chatInput = document.getElementById("chat-input");
