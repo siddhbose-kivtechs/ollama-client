@@ -1,0 +1,405 @@
+/* ComfyUI-inspired Node-based Chat Interface */
+:root {
+  --comfy-bg: #1a1a1a;
+  --comfy-grid: #222222;
+  --comfy-node-bg: #303030;
+  --comfy-node-header: #3a3a3a;
+  --comfy-node-selected: #4a4a4a;
+  --comfy-text: #e0e0e0;
+  --comfy-text-dim: #aaaaaa;
+  --comfy-clip-color: #ffd700; /* Yellow */
+  --comfy-vae-color: #ff5555; /* Red */
+  --comfy-model-color: #8877ff; /* Purple */
+  --comfy-image-color: #55aaff; /* Blue */
+  --comfy-latent-color: #ff55ff; /* Pink */
+  --comfy-conditioning-color: #ff9955; /* Orange */
+}
+
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto Mono', monospace;
+  background: var(--comfy-bg);
+  color: var(--comfy-text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1.5;
+  background-image: 
+    linear-gradient(to right, var(--comfy-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--comfy-grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Container with grid background */
+.chat-container {
+  width: 90%;
+  max-width: 1200px;
+  height: 85vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+/* Header styled as a node */
+.app-header {
+  background: var(--comfy-node-bg);
+  border: 1px solid #444;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.app-header::before {
+  content: "Chat Interface";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--comfy-node-header);
+  width: 100%;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-bottom: 1px solid #444;
+}
+
+.app-title {
+  font-size: 14px;
+  font-weight: normal;
+  margin-top: 20px;
+  color: var(--comfy-text);
+}
+
+/* Node style for model selector */
+.model-select-wrapper {
+  background: var(--comfy-node-bg);
+  border: 1px solid #444;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 10px 15px;
+  margin-top: 20px;
+  position: relative;
+  width: 300px;
+  align-self: flex-start;
+}
+
+.model-select-wrapper::before {
+  content: "Model Selector";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--comfy-node-header);
+  width: 100%;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-bottom: 1px solid #444;
+}
+
+.model-select-wrapper label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: var(--comfy-text-dim);
+}
+
+#model-select {
+  width: 100%;
+  background: #252525;
+  color: var(--comfy-text);
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 6px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+}
+
+/* Main chat area with connection lines */
+.chat-area {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Chat box as a scrollable container */
+.chat-box {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  position: relative;
+  margin: 0 30px;
+  z-index: 1;
+}
+
+/* Custom scrollbar */
+.chat-box::-webkit-scrollbar {
+  width: 10px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 5px;
+}
+
+/* Message nodes */
+.message {
+  background: var(--comfy-node-bg);
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 30px 15px 15px;
+  margin-bottom: 40px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  font-size: 13px;
+  max-width: 600px;
+}
+
+/* Node headers */
+.user-message::before {
+  content: "User Input (Prompt)";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--comfy-node-header);
+  width: 100%;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-bottom: 1px solid #444;
+}
+
+.bot-message::before {
+  content: "AI Response (Output)";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--comfy-node-header);
+  width: 100%;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-bottom: 1px solid #444;
+}
+
+/* Connection points */
+.connection-point {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  position: absolute;
+  z-index: 2;
+}
+
+.user-message .connection-point.output {
+  background-color: var(--comfy-clip-color);
+  right: -5px;
+  top: 30px;
+}
+
+.bot-message .connection-point.input {
+  background-color: var(--comfy-conditioning-color);
+  left: -5px;
+  top: 30px;
+}
+
+.bot-message .connection-point.output {
+  background-color: var(--comfy-image-color);
+  right: -5px;
+  bottom: 20px;
+}
+
+/* Connection lines (SVG) */
+.connections {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Code blocks */
+.message pre {
+  background: #252525;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 10px 0;
+  overflow-x: auto;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  border: 1px solid #444;
+}
+
+.message code {
+  font-family: 'Roboto Mono', monospace;
+  background: #252525;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 12px;
+}
+
+/* Parameter fields in nodes */
+.parameter {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  align-items: center;
+  font-size: 12px;
+}
+
+.parameter label {
+  flex: 1;
+  color: var(--comfy-text-dim);
+}
+
+.parameter input,
+.parameter select {
+  width: 150px;
+  background: #252525;
+  color: var(--comfy-text);
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 4px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+}
+
+/* Bottom input node */
+.input-area {
+  background: var(--comfy-node-bg);
+  border: 1px solid #444;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 30px 15px 15px;
+  position: relative;
+  margin-top: 20px;
+}
+
+.input-area::before {
+  content: "Text Input";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--comfy-node-header);
+  width: 100%;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-bottom: 1px solid #444;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+}
+
+#chat-input {
+  flex: 1;
+  background: #252525;
+  color: var(--comfy-text);
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 8px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  min-height: 40px;
+  max-height: 120px;
+  resize: none;
+}
+
+#send-btn {
+  background: #3a3a3a;
+  color: var(--comfy-text);
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 5px 15px;
+  cursor: pointer;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+}
+
+#send-btn:hover {
+  background: #4a4a4a;
+}
+
+/* Stats area as a mini node */
+.stats-bar {
+  background: var(--comfy-node-bg);
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 25px 10px 10px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--comfy-text-dim);
+  position: relative;
+}
+
+.stats-bar::before {
+  content: "Stats";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--comfy-node-header);
+  width: 100%;
+  padding: 3px 10px;
+  font-size: 12px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-bottom: 1px solid #444;
+}
+
+/* Connection animation */
+@keyframes flowPulse {
+  0%, 100% { stroke-dashoffset: 0; }
+  50% { stroke-dashoffset: -20; }
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .chat-container {
+    width: 100%;
+    height: 100vh;
+    padding: 10px;
+  }
+  
+  .message {
+    width: 95%;
+  }
+}
+
+/* Loading animation */
+.loading {
+  display: flex;
+  align-items: center;
+}
+
+.loading::after {
+  content: "Processing...";
+  font-style: italic;
+  color: var(--comfy-text-dim);
+}
